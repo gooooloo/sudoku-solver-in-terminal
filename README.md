@@ -20,3 +20,12 @@ Sudoku solver step by step in terminal.
 3. run `./a.out` to execute.
 4. either click `a` to see the final result, or click `l` to watch every step.
 5. you can click `h` to go to previous step.
+
+# Why
+The purpose is to help we human to understand how to solve a Sudoku step by step. So,
+1. we don't use backstrace searching. We use rule that human can use in real practice.
+2. we show all possible candidates in the grid.
+3. we show for what reason some candidates become impossible.
+
+Screenshot as below:
+![screenshot](./screenshot.png)
