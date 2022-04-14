@@ -100,43 +100,45 @@ void Board::draw(const Sudoku &sudoku) {
                 int cc        = c / COL_N1;
                 bool done     = sudoku.onlyOneCandidate(rr, cc);
                 bool original = sudoku.original(rr, cc);
-                bool isreason = sudoku.isreason(rr, cc);
 
-                int color_index = COLOR_INDEX_DEFAULT_COLOR;
-                if (original && !isreason)
-                    color_index = COLOR_INDEX_RED;
-                else if (original && isreason)
-                    color_index = COLOR_INDEX_RED_HIGHLIGHT;
-                else if (done && !isreason)
-                    color_index = COLOR_INDEX_YELLOW;
-                else if (done && isreason)
-                    color_index = COLOR_INDEX_YELLOW_HIGHLIGHT;
-                else if (isreason)
-                    color_index = COLOR_INDEX_DEFAULT_HIGHLIGHT;
-                else
-                    /*nothong*/;
+                auto color_index = [&](int n) {
+                    bool isreason = sudoku.isreason(rr, cc, n);
+
+                    if (original && !isreason)
+                        return COLOR_INDEX_RED;
+                    else if (original && isreason)
+                        return COLOR_INDEX_RED_HIGHLIGHT;
+                    else if (done && !isreason)
+                        return COLOR_INDEX_YELLOW;
+                    else if (done && isreason)
+                        return COLOR_INDEX_YELLOW_HIGHLIGHT;
+                    else if (isreason)
+                        return COLOR_INDEX_DEFAULT_HIGHLIGHT;
+                    else
+                        return COLOR_INDEX_DEFAULT_COLOR;
+                };
 
                 if (false)
                     ; /* empty to align codes */
 
                 else if (r % ROW_N1 == 1 && c % COL_N1 == 1 && sudoku.possible(r / ROW_N1, c / COL_N1, 1))
-                    screen.draw(r, c, "1", color_index);
+                    screen.draw(r, c, "1", color_index(1));
                 else if (r % ROW_N1 == 1 && c % COL_N1 == 3 && sudoku.possible(r / ROW_N1, c / COL_N1, 2))
-                    screen.draw(r, c, "2", color_index);
+                    screen.draw(r, c, "2", color_index(2));
                 else if (r % ROW_N1 == 1 && c % COL_N1 == 5 && sudoku.possible(r / ROW_N1, c / COL_N1, 3))
-                    screen.draw(r, c, "3", color_index);
+                    screen.draw(r, c, "3", color_index(3));
                 else if (r % ROW_N1 == 2 && c % COL_N1 == 1 && sudoku.possible(r / ROW_N1, c / COL_N1, 4))
-                    screen.draw(r, c, "4", color_index);
+                    screen.draw(r, c, "4", color_index(4));
                 else if (r % ROW_N1 == 2 && c % COL_N1 == 3 && sudoku.possible(r / ROW_N1, c / COL_N1, 5))
-                    screen.draw(r, c, "5", color_index);
+                    screen.draw(r, c, "5", color_index(5));
                 else if (r % ROW_N1 == 2 && c % COL_N1 == 5 && sudoku.possible(r / ROW_N1, c / COL_N1, 6))
-                    screen.draw(r, c, "6", color_index);
+                    screen.draw(r, c, "6", color_index(6));
                 else if (r % ROW_N1 == 3 && c % COL_N1 == 1 && sudoku.possible(r / ROW_N1, c / COL_N1, 7))
-                    screen.draw(r, c, "7", color_index);
+                    screen.draw(r, c, "7", color_index(7));
                 else if (r % ROW_N1 == 3 && c % COL_N1 == 3 && sudoku.possible(r / ROW_N1, c / COL_N1, 8))
-                    screen.draw(r, c, "8", color_index);
+                    screen.draw(r, c, "8", color_index(8));
                 else if (r % ROW_N1 == 3 && c % COL_N1 == 5 && sudoku.possible(r / ROW_N1, c / COL_N1, 9))
-                    screen.draw(r, c, "9", color_index);
+                    screen.draw(r, c, "9", color_index(9));
 
                 else
                     screen.draw(r, c, BLANK, BG_COLOR_DEFAULT);

@@ -129,7 +129,7 @@ bool Sudoku::calc_only_one_candidate_in_cell(Sudoku &dst) const {
         cell.markDone();
 
         if (anychange) {
-            dst.reasons[0] = rc;
+            dst.addreason_v(rc, cell.candidates());
             return true;
         }
     }
@@ -159,7 +159,7 @@ bool Sudoku::calc_only_one_candidate_in_row_or_column_or_block(Sudoku &dst) cons
 
             if (cnt == 1 && !dst.cellref(lastrc).onlyOneCandidate()) {
                 dst.cellref(lastrc).includeOnly_n(n);
-                dst.reasons[0] = lastrc;
+                dst.addreason_n(lastrc, n);
                 return true;
             }
         }
@@ -193,7 +193,7 @@ bool Sudoku::calc_block_candidates_in_same_row_or_column(Sudoku &dst) const {
                     }
                 }
                 if (anychange) {
-                    for (int i = 0; i < rcs.size() && i < 4; i++) dst.reasons[i] = rcs[i];
+                    for (int i = 0; i < rcs.size() && i < 4; i++) dst.addreason_n(rcs[i], n);
                     return true;
                 }
             }
@@ -210,7 +210,7 @@ bool Sudoku::calc_block_candidates_in_same_row_or_column(Sudoku &dst) const {
                     }
                 }
                 if (anychange) {
-                    for (int i = 0; i < rcs.size() && i < 4; i++) dst.reasons[i] = rcs[i];
+                    for (int i = 0; i < rcs.size() && i < 4; i++) dst.addreason_n(rcs[i], n);
                     return true;
                 }
             }
@@ -223,14 +223,17 @@ bool Sudoku::calc_block_candidates_in_same_row_or_column(Sudoku &dst) const {
 bool Sudoku::calc_row_candidates_in_same_block(Sudoku &dst) const {
     for (int r = 0; r < 9; r++) {
         for (int n = 1; n <= 9; n++) {
-            int b = -1;
+            std::vector<RC> rcs;
             RowCellIter rowiter(r);
             while (rowiter.hasNext()) {
                 RC rc = rowiter.next();
-                if (dst.cellref(rc).intersect_n(n)) {
-                    if (b == -1) b = rc2b(rc);
-                    if (b != rc2b(rc)) b = -2;
-                }
+                if (dst.cellref(rc).intersect_n(n)) rcs.push_back(rc);
+            }
+            int b = -1;
+            for (auto it = rcs.begin(); it != rcs.end(); it++) {
+                RC rc = *it;
+                if (b == -1) b = rc2b(rc);
+                if (b != rc2b(rc)) b = -2;
             }
             if (0 <= b && b < 9) {
                 BlockCellIter blockiter(b);
@@ -238,6 +241,7 @@ bool Sudoku::calc_row_candidates_in_same_block(Sudoku &dst) const {
                     RC rcrc = blockiter.next();
                     if (rcrc.r != r && dst.cellref(rcrc).intersect_n(n)) {
                         dst.cellref(rcrc).exclude_n(n);
+                        for (auto it = rcs.begin(); it != rcs.end(); it++) dst.addreason_n(*it, n);
                         return true;
                     }
                 }
@@ -251,14 +255,17 @@ bool Sudoku::calc_row_candidates_in_same_block(Sudoku &dst) const {
 bool Sudoku::calc_column_candidates_in_same_block(Sudoku &dst) const {
     for (int c = 0; c < 9; c++) {
         for (int n = 1; n <= 9; n++) {
-            int b = -1;
+            std::vector<RC> rcs;
             ColumnCellIter coliter(c);
             while (coliter.hasNext()) {
                 RC rc = coliter.next();
-                if (dst.cellref(rc).intersect_n(n)) {
-                    if (b == -1) b = rc2b(rc);
-                    if (b != rc2b(rc)) b = -2;
-                }
+                if (dst.cellref(rc).intersect_n(n)) rcs.push_back(rc);
+            }
+            int b = -1;
+            for (auto it = rcs.begin(); it != rcs.end(); it++) {
+                RC rc = *it;
+                if (b == -1) b = rc2b(rc);
+                if (b != rc2b(rc)) b = -2;
             }
             if (0 <= b && b < 9) {
                 BlockCellIter blockiter(b);
@@ -266,6 +273,7 @@ bool Sudoku::calc_column_candidates_in_same_block(Sudoku &dst) const {
                     RC rcrc = blockiter.next();
                     if (rcrc.c != c && dst.cellref(rcrc).intersect_n(n)) {
                         dst.cellref(rcrc).exclude_n(n);
+                        for (auto it = rcs.begin(); it != rcs.end(); it++) dst.addreason_n(*it, n);
                         return true;
                     }
                 }
@@ -305,8 +313,8 @@ bool Sudoku::calc_isolate2(Sudoku &dst) const {
                     if (RC::cmp(rc2, rc3) >= 0) continue;
                     if (dst.cellref(rc3).intersect_v(candidates2)) {
                         dst.cellref(rc3).exclude_v(candidates2);
-                        dst.reasons[0] = rc;
-                        dst.reasons[1] = rc2;
+                        dst.addreason_v(rc, candidates2);
+                        dst.addreason_v(rc2, candidates2);
                         return true;
                     }
                 }
@@ -362,9 +370,9 @@ bool Sudoku::calc_isolate3(Sudoku &dst) const {
                         if (dst.cellref(rc4).onlyOneCandidate()) continue;
                         if (dst.cellref(rc4).intersect_v(candidates3)) {
                             dst.cellref(rc4).exclude_v(candidates3);
-                            dst.reasons[0] = rc;
-                            dst.reasons[1] = rc2;
-                            dst.reasons[2] = rc3;
+                            dst.addreason_v(rc, candidates1);
+                            dst.addreason_v(rc2, candidates2);
+                            dst.addreason_v(rc3, candidates3);
                             return true;
                         }
                     }
